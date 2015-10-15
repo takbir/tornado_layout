@@ -1,4 +1,4 @@
-#encoding=utf8
+# encoding=utf8
 
 import tornado.ioloop
 import tornado.web
@@ -12,7 +12,9 @@ from tornado.netutil import bind_sockets
 from common.log_utils import getLogger
 log = getLogger('main.py')
 
+
 class PageNotFoundHandler(tornado.web.RequestHandler):
+
     def get(self):
         self.render("error.html")
 
@@ -34,7 +36,7 @@ if __name__ == "__main__":
     tornado.locale.load_translations(settings.settings['translations'])
     application = urls.application
 
-    #bind signals
+    # bind signals
     sockets = bind_sockets(MAIN_SITE_PORT)
 
     if not settings.DEBUG and settings.OS == 'linux':

@@ -1,4 +1,4 @@
-#encoding=utf8
+# encoding=utf8
 
 try:
     from functools import wraps
@@ -6,6 +6,7 @@ except ImportError:
     raise "No wrapper"
 
 import tornado
+
 
 def render_json(method):
     '''
@@ -21,6 +22,7 @@ def render_json(method):
         success_json.update(output)
         self.write(tornado.escape.json_encode(success_json))
     return wrapper
+
 
 def render_to(method):
     @wraps(method)

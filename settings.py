@@ -1,4 +1,4 @@
-#encoding=utf8
+# encoding=utf8
 
 import os
 SITE_ROOT = os.path.dirname(os.path.abspath(__file__))

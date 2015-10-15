@@ -1,5 +1,10 @@
 #encoding=utf8
 
+import os
+import sys
+if __name__ == '__main__':
+    sys.path.insert(0, os.path.abspath(os.curdir))
+
 import time
 from common.log_utils import getLogger
 log = getLogger('memorize_cache.py')
@@ -7,8 +12,15 @@ log = getLogger('memorize_cache.py')
 __all__ = ['memorize', 'memcache_client']
 
 import memcache
-import settings
-memcache_client = memcache.Client(settings.settings['memcache_server'])
+
+memcache_client = None
+def get_memcache_client():
+    global memcache_client
+    if not memcache_client:
+        import settings
+        memcache_client = memcache.Client(['%s:%d' % (settings.MEMCACHE_SERVER, settings.MEMCACHE_PORT)])        
+    return memcache_client
+
 
 OBJ_DICT = {}
 OBJ_DICT2 = {}
@@ -20,10 +32,10 @@ MEMORY_CLEANER_PERIOD = 60*30
 OBJ_VERSION_DICT = {}
 
 def set_remote_obj_version(key, version):
-    return memcache_client.set(key, version, DEFAULT_VERSION_EXPIRE_SECONDS)
+    return get_memcache_client().set(key, version, DEFAULT_VERSION_EXPIRE_SECONDS)
 
 def get_remote_obj_version(key):
-    return memcache_client.get(key) or 0
+    return get_memcache_client().get(key) or 0
 
 def set_local_obj_version(key, version):
     OBJ_VERSION_DICT[key] = version
@@ -121,12 +133,44 @@ def memorize(function):
         return ret_obj
     return helper
 
-@memorize
-def test(x):
-    return file(x).read()
+def memorize_cache(function):
+
+    """Redis缓存, 用于不定参数的函数
+    Usage:
+        def xxx(key1,key2,refresh=False)
+            return instance
+        def xxx(key1,key2,key2,x1=xx,x2=yyy)
+            return instance
+    """
+
+    def helper(*args, **kwargs):
+        # redis_conn = redis_utils.get_redis_conn()
+        refresh = False
+        if 'refresh' in kwargs:
+            refresh = kwargs.pop('refresh')
+        key = '%s#%s#%s' % (function.__module__, function.__name__, '#'.join(map(arg_to_str, args)))
+        if refresh:
+            get_memcache_client().delete(key)
+        else:
+            remote_obj = get_memcache_client().get(key)
+            if not remote_obj:
+                local_obj = function(*args, **kwargs)
+                get_memcache_client().set(key, local_obj, 60 * 30)
+                return local_obj
+            return remote_obj
+
+    return helper
+
+
+@memorize_cache
+def test(arg):
+    print 'executing function'
+    return [1,2,3,4,5,6,7,8,9,10]
 
 if __name__ == '__main__':
-    x = 'aaa'
-    txt = test(x)
-
-    txt = test(x)
+    test(1, refresh=True)
+    begin = time.time()
+    for i in xrange(50000):
+        test(1)
+    end = time.time()
+    print begin, end, end - begin
