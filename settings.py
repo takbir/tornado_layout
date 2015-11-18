@@ -12,6 +12,10 @@ DEBUG = True
 
 SECRET_KEY = '1f906fb1638ebdb01ade5f1cb55e928f8fe09fcc'
 
+# redis
+REDIS_ADDRESS = '127.0.0.1'
+REDIS_PORT = 6379
+
 try:
     from local_settings import *
 except:
