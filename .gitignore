@@ -60,3 +60,6 @@ local_settings.py
 
 # virtualenv
 .venv
+
+# pylint
+.pylintrc

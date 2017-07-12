@@ -1,17 +1,15 @@
 # encoding=utf8
 
+import base64
+import json
+import traceback
+
 import tornado.web
 import tornado.escape
 from tornado import locale
-import traceback
+
 import settings
-from common.session import SessionHandler
-import base64
-import json
-
-
-from common.log_utils import getLogger
-log = getLogger('base.py')
+from session import SessionHandler
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -44,11 +42,7 @@ class BaseHandler(tornado.web.RequestHandler):
                 m_info = ''.join(exc_str).replace("\n", "<br>")
                 m_info = 'URL: ' + self.request.host + \
                     self.request.uri + '<br>' + m_info
-                # ip = self.request.headers.get("X-Real-Ip", self.request.headers.get("X-Forwarded-For", self.request.remote_ip))
-                # m_info_all = 'Ip: ' + ip + '<br>' + m_info
-                # err_msg=dict(errcode=str(status_code), content = m_info_all, ip = ip)
-                # self.save_error_msg('', err_msg)
-                self.render("500.html")
+                self.render("500.html", m_info=m_info)
                 return
             self.render("error.html", msg=status_code)
 

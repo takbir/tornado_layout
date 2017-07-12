@@ -1,16 +1,27 @@
 # encoding=utf8
 
+import os
+import sys
+import logging
+
+import settings
+import urls
+
 import tornado.ioloop
 import tornado.web
 import tornado.escape
-import settings
-import sys
-import urls
 from tornado.httpserver import HTTPServer
 from tornado.netutil import bind_sockets
+from tornado.options import define, parse_command_line
 
-from common.log_utils import getLogger
-log = getLogger('main.py')
+
+define('log_file_prefix', default=os.path.join(settings.SITE_ROOT, 'logs', 'access.log'))
+define('log_rotate_mode', default='time')
+define('log_rotate_when', default='D')
+define('log_rotate_interval', default=1)
+parse_command_line()
+
+logger = logging.getLogger(__file__)
 
 
 class PageNotFoundHandler(tornado.web.RequestHandler):
@@ -24,6 +35,7 @@ class PageNotFoundHandler(tornado.web.RequestHandler):
     def initialize(self, status_code):
         self.set_status(status_code)
 
+
 if len(sys.argv) > 1:
     MAIN_SITE_PORT = int(sys.argv[1])
 else:
@@ -33,7 +45,8 @@ tornado.web.ErrorHandler = PageNotFoundHandler
 
 if __name__ == "__main__":
 
-    tornado.locale.load_translations(settings.settings['translations'])
+    # i18n
+    # tornado.locale.load_translations(settings.settings['translations'])
     application = urls.application
 
     # bind signals
@@ -45,5 +58,5 @@ if __name__ == "__main__":
 
     server = HTTPServer(application, xheaders=True)
     server.add_sockets(sockets)
-    log.debug(settings.SITE_URL)
+    logger.info(settings.SITE_URL)
     tornado.ioloop.IOLoop.instance().start()

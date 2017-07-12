@@ -1,4 +1,4 @@
-#encoding=utf8
+# encoding=utf8
 
 import log4py
 

@@ -27,7 +27,7 @@ url_list = (
 """
 
 _views = (
-    'index.v_index',
+    'index.handlers',
 )
 
 
@@ -40,6 +40,7 @@ def load_urls():
             urls = module.url_list
             url_list.extend(urls)
     return url_list
+
 
 url_mapping.extend(load_urls())
 

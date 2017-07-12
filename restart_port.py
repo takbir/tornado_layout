@@ -1,4 +1,4 @@
-#encoding=utf8
+# encoding=utf8
 
 import sys
 import commands
@@ -10,6 +10,7 @@ from survey import survey_utils
 import requests
 
 current_user = getpass.getuser()
+
 
 def get_pid(port):
     output = commands.getoutput('ps aux|grep "[p]ython main1.py"')
@@ -30,24 +31,28 @@ def usage():
     print 'Usage: restart_port.py <port|all> <port_from> <process_number>'
     sys.exit(1)
 
+
 def kill_port(port):
     pid = get_pid(port)
     if pid:
         cmd = 'kill -9 %s' % pid
         print 'killing process ...'
-        status,output = commands.getstatusoutput(cmd)
-        #time.sleep(2)
+        status, output = commands.getstatusoutput(cmd)
+        # time.sleep(2)
         print 'process %s for port %s is killed' % (pid, port)
+
 
 def restart_port(port):
     pid = get_pid(port)
     if pid:
         cmd = 'kill -9 %s' % pid
-        status,output = commands.getstatusoutput(cmd)
+        status, output = commands.getstatusoutput(cmd)
         time.sleep(1)
-    cmd = 'nohup python main1.py -port=%s >> /data/log/p_%s.log &' % (port, port)
+    cmd = 'nohup python main1.py -port=%s >> /data/log/p_%s.log &' % (
+        port, port)
     # status,output = commands.getstatusoutput(cmd)
     os.system(cmd)
+
 
 def check_port_is_health(port):
     need_check = True
@@ -67,38 +72,40 @@ def check_port_is_health(port):
             print 'port=', port
             restart_port(port)
 
+
 try:
     port = sys.argv[1]
     survey_utils.mem_set('restart_port', time.time())
-except:
+except BaseException:
     usage()
+
 
 if port == 'all':
     try:
         port_from = int(sys.argv[2])
-    except:
+    except BaseException:
         usage()
 
     try:
         process_number = int(sys.argv[3])
-    except:
+    except BaseException:
         usage()
 
-    for port in range(port_from, port_from+process_number):
+    for port in range(port_from, port_from + process_number):
         restart_port(port)
         check_port_is_health(port)
 elif port == 'kill':
     try:
         port_from = int(sys.argv[2])
-    except:
+    except BaseException:
         usage()
 
     try:
         process_number = int(sys.argv[3])
-    except:
+    except BaseException:
         usage()
 
-    for port in range(port_from, port_from+process_number):
+    for port in range(port_from, port_from + process_number):
         kill_port(port)
 else:
     restart_port(port)
