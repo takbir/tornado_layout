@@ -10,7 +10,7 @@ class IndexHandler(BaseHandler):
 
     @render_to
     def get(self):
-        return 'index.html', locals()
+        return 'index/index.html', locals()
 
 
 url_list = (
